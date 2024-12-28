@@ -41,7 +41,7 @@ jobs:
         youtube_link = "${{ github.event.inputs.youtube_link }}"
         youtube_api_key = os.environ['YOUTUBE_API_KEY']
         port_api_key = os.environ['PORT_API_KEY']
-        port_url = "https://app.getport.io/api/v1/ingest"
+        port_url = "https://api.getport.io/v1/blueprints/:new_data/entities"
 
         # Parse the playlist ID from the URL
         query_params = parse_qs(urlparse(youtube_link).query)
@@ -79,9 +79,9 @@ jobs:
                 stats = video_data["statistics"]
 
                 payload = {
-                    "blueprint": "youtube_data",
-                    "operation": "create",
-                    "filter": "true",
+                    "identifier": video_id,
+                    "title": video_title,
+                    "icon": "Default",
                     "entity": {
                         "identifier": video_id,
                         "title": video_title,
@@ -96,19 +96,26 @@ jobs:
                     }
                 }
 
+                # Headers for Port API request
+                headers = {
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {port_api_key}"
+                }
+
                 # Log the Payload
                 print(f"Payload for video '{video_title}':")
                 print(payload)
 
                 # Ingest into Port
-                headers = {"Authorization": f"Bearer {port_api_key}"}
                 response = requests.post(port_url, json=payload, headers=headers)
+                
+                # Log response status and content
+                print(f"Status Code: {response.status_code}")
+                print(f"Response Headers: {response.headers}")
+                print(f"Response Text: {response.text}")
+
                 if response.status_code != 200:
                     print(f"Failed to ingest video '{video_title}': {response.text}")
-
-                # Debugging output
-                print(f"Port response status: {response.status_code}")
-                print(f"Port response body: {response.text}")
 
             # Check if more pages exist
             next_page_token = playlist_response.get("nextPageToken")
