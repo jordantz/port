@@ -103,7 +103,6 @@ jobs:
                         "identifier": video_id,
                         "title": video_title,
                         "properties": {
-                            "youtube_video_name": video_title,
                             "youtube_account": channel_title,
                             "youtube_uploaded_on": published_at,
                             "youtube_views": stats.get("viewCount"),
