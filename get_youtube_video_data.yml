@@ -3,8 +3,8 @@ name: Fetch YouTube Playlist Data and Ingest into Port
 on:
   workflow_dispatch:
     inputs:
-      playlist_url:
-        description: "YouTube Playlist URL"
+      youtube_link:
+        description: "YouTube Playlist Link"
         required: true
         type: string
 
@@ -38,13 +38,13 @@ jobs:
         from googleapiclient.discovery import build
 
         # Inputs and API keys
-        playlist_url = "${{ github.event.inputs.playlist_url }}"
+        youtube_link = "${{ github.event.inputs.youtube_link }}"
         youtube_api_key = os.environ['YOUTUBE_API_KEY']
         port_api_key = os.environ['PORT_API_KEY']
         port_url = "https://app.getport.io/api/v1/ingest"
 
-        # Parse the playlist ID from the URL
-        query_params = parse_qs(urlparse(playlist_url).query)
+        # Parse the playlist ID from the Link
+        query_params = parse_qs(urlparse(youtube_link).query)
         playlist_id = query_params.get("list", [None])[0]
 
         if not playlist_id:
