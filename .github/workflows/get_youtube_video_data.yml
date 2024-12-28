@@ -150,4 +150,6 @@ jobs:
             }
           }
         }
+        response = requests.post(port_url, json=payload, headers=headers)
+        
         EOF
