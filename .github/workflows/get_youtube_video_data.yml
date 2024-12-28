@@ -89,8 +89,8 @@ jobs:
                             "youtube_video_name": video_title,
                             "youtube_account": channel_title,
                             "youtube_uploaded_on": published_at,
-                            "youtube_views": int(stats.get("viewCount")),
-                            "youtube_comments": int(stats.get("commentCount")),
+                            "youtube_views": int(stats.get("viewCount") or 0),
+                            "youtube_comments": int(stats.get("commentCount") or 0),
                             "youtube_video_url": f"https://www.youtube.com/watch?v={video_id}"
                         }
                     }
