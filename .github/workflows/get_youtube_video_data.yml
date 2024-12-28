@@ -41,7 +41,7 @@ jobs:
         youtube_link = "${{ github.event.inputs.youtube_link }}"
         youtube_api_key = os.environ['YOUTUBE_API_KEY']
         port_api_key = os.environ['PORT_API_KEY']
-        port_url = "https://api.getport.io/v1/blueprints/:youtube_data/entities"
+        port_url = "https://api.getport.io/v1/blueprints/youtube_data/entities"
 
         # Parse the playlist ID from the URL
         query_params = parse_qs(urlparse(youtube_link).query)
@@ -52,6 +52,23 @@ jobs:
 
         # Initialize YouTube API client
         youtube = build('youtube', 'v3', developerKey=youtube_api_key)
+
+        # Headers for Port API request
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": port_api_key
+        }
+
+        # Verify blueprint existence and accessibility
+        response = requests.get(f"https://api.getport.io/v1/blueprints/youtube_data", headers=headers)
+        print(f"Blueprint check response: {response.status_code}")
+        print(f"Response Text: {response.text}")
+
+        if response.status_code != 200:
+            raise Exception(f"Blueprint 'youtube_data' check failed with status: {response.status_code} and message: {response.text}")
+
+        # Log success
+        print("Blueprint 'youtube_data' is accessible. Proceeding with ingestion.")
 
         # Fetch videos from the playlist
         next_page_token = None
@@ -94,12 +111,6 @@ jobs:
                             "youtube_video_url": f"https://www.youtube.com/watch?v={video_id}"
                         }
                     }
-                }
-
-                # Headers for Port API request
-                headers = {
-                    "Content-Type": "application/json",
-                    "Authorization": f"{port_api_key}"
                 }
 
                 # Log the Payload
