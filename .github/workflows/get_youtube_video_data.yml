@@ -132,4 +132,22 @@ jobs:
             next_page_token = playlist_response.get("nextPageToken")
             if not next_page_token:
                 break
+
+        payload = {
+        "identifier": "test_video",
+        "title": "Test Video",
+        "icon": "Default",
+        "entity": {
+            "identifier": "test_video",
+            "title": "Test Video",
+            "properties": {
+                "youtube_video_name": "Test Video Name",
+                "youtube_account": "Test Account",
+                "youtube_uploaded_on": "2022-01-01T00:00:00Z",
+                "youtube_views": "1000",
+                "youtube_comments": "10",
+                "youtube_video_url": "https://www.youtube.com/watch?v=test_video"
+            }
+          }
+        }
         EOF
