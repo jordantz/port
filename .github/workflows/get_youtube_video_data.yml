@@ -41,7 +41,7 @@ jobs:
         youtube_link = "${{ github.event.inputs.youtube_link }}"
         youtube_api_key = os.environ['YOUTUBE_API_KEY']
         port_api_key = os.environ['PORT_API_KEY']
-        port_url = "https://api.getport.io/v1/blueprints/:new_data/entities"
+        port_url = "https://api.getport.io/v1/blueprints/:youtube_data/entities"
 
         # Parse the playlist ID from the URL
         query_params = parse_qs(urlparse(youtube_link).query)
