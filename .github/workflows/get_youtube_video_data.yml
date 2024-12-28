@@ -83,7 +83,6 @@ jobs:
             for item in playlist_response.get("items", []):
                 video_id = item["snippet"]["resourceId"]["videoId"]
                 video_title = item["snippet"]["title"]
-                channel_title = item["snippet"]["channelTitle"]
                 published_at = item["snippet"]["publishedAt"]
 
                 # Fetch video details for views and comments
@@ -94,6 +93,7 @@ jobs:
 
                 video_data = video_response.get("items", [])[0]
                 stats = video_data["statistics"]
+                channel_title = video_data["snippet"]["channelTitle"]
 
                 payload = {
                     "identifier": video_id,
