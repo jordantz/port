@@ -1,0 +1,109 @@
+name: Fetch YouTube Playlist Data and Ingest into Port
+
+on:
+  workflow_dispatch:
+    inputs:
+      youtube_link:
+        description: "YouTube Playlist Link"
+        required: true
+        type: string
+
+jobs:
+  fetch-and-ingest:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests google-api-python-client
+
+    - name: Fetch Playlist Data and Ingest into Port
+      env:
+        YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+        PORT_API_KEY: ${{ secrets.PORT_API_KEY }}
+      run: |
+        python <<EOF
+        import os
+        import requests
+        from urllib.parse import urlparse, parse_qs
+        from googleapiclient.discovery import build
+
+        # Inputs and API keys
+        youtube_link = "${{ github.event.inputs.youtube_link }}"
+        youtube_api_key = os.environ['YOUTUBE_API_KEY']
+        port_api_key = os.environ['PORT_API_KEY']
+        port_url = "https://app.getport.io/api/v1/ingest"
+
+        # Parse the playlist ID from the Link
+        query_params = parse_qs(urlparse(youtube_link).query)
+        playlist_id = query_params.get("list", [None])[0]
+
+        if not playlist_id:
+            raise ValueError("Invalid playlist URL. Please provide a valid YouTube playlist link.")
+
+        # Initialize YouTube API client
+        youtube = build('youtube', 'v3', developerKey=youtube_api_key)
+
+        # Fetch videos from the playlist
+        next_page_token = None
+        while True:
+            playlist_response = youtube.playlistItems().list(
+                part="snippet",
+                playlistId=playlist_id,
+                maxResults=50,
+                pageToken=next_page_token
+            ).execute()
+
+            for item in playlist_response.get("items", []):
+                video_id = item["snippet"]["resourceId"]["videoId"]
+                video_title = item["snippet"]["title"]
+                channel_title = item["snippet"]["channelTitle"]
+                published_at = item["snippet"]["publishedAt"]
+
+                # Fetch video details for views and comments
+                video_response = youtube.videos().list(
+                    part="statistics,snippet",
+                    id=video_id
+                ).execute()
+
+                video_data = video_response.get("items", [])[0]
+                stats = video_data["statistics"]
+
+                payload = {
+                    "blueprint": "youtube_data",
+                    "operation": "create",
+                    "filter": "true",
+                    "entity": {
+                        "identifier": video_id,
+                        "title": video_title,
+                        "properties": {
+                            "youtube_video_name": video_title,
+                            "youtube_account": channel_title,
+                            "youtube_uploaded_on": published_at,
+                            "youtube_views": stats.get("viewCount"),
+                            "youtube_comments": stats.get("commentCount"),
+                            "youtube_video_url": f"https://www.youtube.com/watch?v={video_id}"
+                        }
+                    }
+                }
+
+                # Ingest into Port
+                headers = {"Authorization": f"Bearer {port_api_key}"}
+                response = requests.post(port_url, json=payload, headers=headers)
+                if response.status_code != 200:
+                    print(f"Failed to ingest video '{video_title}': {response.text}")
+
+            # Check if more pages exist
+            next_page_token = playlist_response.get("nextPageToken")
+            if not next_page_token:
+                break
+        EOF
