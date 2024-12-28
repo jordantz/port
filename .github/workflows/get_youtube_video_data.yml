@@ -106,6 +106,10 @@ jobs:
                 if response.status_code != 200:
                     print(f"Failed to ingest video '{video_title}': {response.text}")
 
+                # Debugging output
+                print(f"Port response status: {response.status_code}")
+                print(f"Port response body: {response.text}")
+
             # Check if more pages exist
             next_page_token = playlist_response.get("nextPageToken")
             if not next_page_token:
