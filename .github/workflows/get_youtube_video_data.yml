@@ -96,6 +96,9 @@ jobs:
                     }
                 }
 
+                - name: Log Payload
+                run: echo "Payload: ${{ toJson(steps.prepare_payload.outputs.data) }}"
+
                 # Ingest into Port
                 headers = {"Authorization": f"Bearer {port_api_key}"}
                 response = requests.post(port_url, json=payload, headers=headers)
