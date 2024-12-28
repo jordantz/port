@@ -99,7 +99,7 @@ jobs:
                 # Headers for Port API request
                 headers = {
                     "Content-Type": "application/json",
-                    "Authorization": f"Bearer {port_api_key}"
+                    "Authorization": f"{port_api_key}"
                 }
 
                 # Log the Payload
