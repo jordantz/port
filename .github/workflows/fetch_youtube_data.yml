@@ -59,13 +59,6 @@ jobs:
             "Authorization": port_api_key
         }
 
-        # Verify blueprint existence and accessibility
-        response = requests.get(f"https://api.getport.io/v1/blueprints/youtube_data_blueprint", headers=headers) # change 'youtube_data_blueprint' to match the desired blueprint's name
-        print(f"Blueprint check response: {response.status_code}")
-        print(f"Response Text: {response.text}")
-        if response.status_code != 200:
-            raise Exception(f"Blueprint 'youtube_data_blueprint' check failed with status: {response.status_code} and message: {response.text}")
-
         # Function to ingest video data into Port
         def ingest_video(video_id):
             # Fetch video details
