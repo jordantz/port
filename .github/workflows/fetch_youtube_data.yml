@@ -36,7 +36,6 @@ jobs:
         import requests
         from urllib.parse import urlparse, parse_qs
         from googleapiclient.discovery import build
-        from datetime import datetime
 
         # Inputs and API keys
         youtube_url = "${{ github.event.inputs.youtube_url }}"
@@ -82,11 +81,6 @@ jobs:
             snippet = video_data["snippet"]
             stats = video_data["statistics"]
 
-            # Parse and format the upload date
-            published_at = snippet["publishedAt"]
-            # dt = datetime.fromisoformat(published_at.replace("Z", "+00:00"))
-            # formatted_date = dt.strftime("%d %b, %Y, %H:%M")
-
             # Prepare the payload
             payload = {
                 "identifier": video_id,
@@ -97,7 +91,7 @@ jobs:
                     "title": snippet["title"],
                     "properties": {
                         "youtube_account_owner": snippet["channelTitle"],
-                        "youtube_upload_date": published_at,
+                        "youtube_upload_date": snippet["publishedAt"],
                         "youtube_views_count": int(stats.get("viewCount", 0)),
                         "youtube_comments_count": int(stats.get("commentCount", 0)),
                         "youtube_video_url": f"https://www.youtube.com/watch?v={video_id}"
