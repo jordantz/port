@@ -47,8 +47,8 @@ jobs:
         # Parse the input URL
         query_params = parse_qs(urlparse(youtube_url).query)
         playlist_id = query_params.get("list", [None])[0]
-        video_id = query_params.get("v", [None])[0]
-        if not (playlist_id or video_id):
+        single_video_id = query_params.get("v", [None])[0]
+        if not (playlist_id or single_video_id):
             raise ValueError("Invalid URL. Provide a valid YouTube playlist or video link.")
 
         # Initialize YouTube API client
@@ -83,7 +83,7 @@ jobs:
             stats = video_data["statistics"]
 
             # Parse and format the upload date
-            published_at = snippet["publishedAt"]
+            # published_at = snippet["publishedAt"]
             # dt = datetime.fromisoformat(published_at.replace("Z", "+00:00"))
             # formatted_date = dt.strftime("%d %b, %Y, %H:%M")
 
@@ -97,7 +97,7 @@ jobs:
                     "title": snippet["title"],
                     "properties": {
                         "youtube_account_owner": snippet["channelTitle"],
-                        "youtube_upload_date": published_at,
+                        # "youtube_upload_date": published_at,
                         "youtube_views_count": int(stats.get("viewCount", 0)),
                         "youtube_comments_count": int(stats.get("commentCount", 0)),
                         "youtube_video_url": f"https://www.youtube.com/watch?v={video_id}"
@@ -138,6 +138,6 @@ jobs:
                 next_page_token = playlist_response.get("nextPageToken")
                 if not next_page_token:
                     break
-        elif video_id:  # If it's a single video
-            ingest_video(video_id)
+        elif single_video_id:  # If it's a single video
+            ingest_video(single_video_id)
         EOF
