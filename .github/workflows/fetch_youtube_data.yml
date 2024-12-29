@@ -116,7 +116,7 @@ jobs:
             print(f"Response Headers: {response.headers}")
             print(f"Response Text: {response.text}")
 
-            if response.status_code != 200:
+            if response.status_code not in [200, 202]:
                 raise Exception(f"Failed to ingest video {snippet['title']}")
             
         # If it's a playlist, fetch all videos
